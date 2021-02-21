@@ -18,9 +18,7 @@ defmodule SebastianWeb.Router do
   end
 
   pipeline :admins_only do
-    if Mix.env() in [:prod] do
-      plug :basic_auth, Application.fetch_env!(:sebastian, SebastianWeb.Endpoint)[:basic_auth]
-    end
+    plug :basic_auth, Application.fetch_env!(:sebastian, SebastianWeb.Endpoint)[:basic_auth]
   end
 
   pipeline :protected do
@@ -33,9 +31,12 @@ defmodule SebastianWeb.Router do
     pipe_through :api
   end
 
-  scope "/", SebastianWeb do
-    pipe_through [:browser, :admins_only]
-    live_dashboard "/dashboard"
+  if Mix.env() in [:prod] do
+    scope "/", SebastianWeb do
+      Logger.info Application.fetch_env!(:sebastian, SebastianWeb.Endpoint)[:basic_auth]
+      pipe_through [:browser, :admins_only]
+      live_dashboard "/dashboard"
+    end
   end
 
   # Enables LiveDashboard only for development
@@ -47,8 +48,9 @@ defmodule SebastianWeb.Router do
   # as long as you are also using SSL (which you should anyway).
   if Mix.env() in [:dev, :test] do
     scope "/" do
-      pipe_through [:fetch_session, :protect_from_forgery]
-      live_dashboard "/dashboard", metrics: SebastianWeb.Telemetry
+      Logger.info Application.fetch_env!(:sebastian, SebastianWeb.Endpoint)[:basic_auth]
+      pipe_through [:browser, :admins_only]
+      live_dashboard "/dashboard"
     end
   end
 end
