@@ -18,7 +18,9 @@ defmodule SebastianWeb.Router do
   end
 
   pipeline :admins_only do
-    plug :basic_auth, Application.fetch_env!(:sebastian, :basic_auth)
+    if Mix.env() in [:prod] do
+      plug :basic_auth, Application.fetch_env!(:sebastian, SebastianWeb.Endpoint)[:basic_auth]
+    end
   end
 
   pipeline :protected do
