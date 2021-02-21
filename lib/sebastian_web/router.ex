@@ -1,12 +1,26 @@
+
 defmodule SebastianWeb.Router do
+  import Phoenix.LiveDashboard.Router
   use SebastianWeb, :router
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
+  pipeline :protected do
+    if System.get_env("HTTP_BASIC_AUTH_USERNAME") || System.get_env("HTTP_BASIC_AUTH_PASSWORD") do
+      plug BasicAuth, use_config: {:sebastian, :basic_auth}
+    end
+  end
+
   scope "/api", SebastianWeb do
     pipe_through :api
+  end
+
+  scope "/", SebastianWeb do
+    pipe_through [:protected]
+    live_dashboard "/dashboard", metrics: SebastianWeb.Telemetry
+
   end
 
   # Enables LiveDashboard only for development
@@ -17,8 +31,6 @@ defmodule SebastianWeb.Router do
   # you can use Plug.BasicAuth to set up some basic authentication
   # as long as you are also using SSL (which you should anyway).
   if Mix.env() in [:dev, :test] do
-    import Phoenix.LiveDashboard.Router
-
     scope "/" do
       pipe_through [:fetch_session, :protect_from_forgery]
       live_dashboard "/dashboard", metrics: SebastianWeb.Telemetry

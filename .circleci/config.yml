@@ -11,7 +11,7 @@ jobs:
             export HEROKU_API_KEY=$HEROKU_API_KEY
             sudo curl https://cli-assets.heroku.com/install.sh | sh
             heroku container:login
-            heroku container:push --arg MIX_ENV=prod -a $HEROKU_APP_NAME web
+            heroku container:push --arg MIX_ENV=prod,dashboard_username=$APP_USERNAME,dashboard_password=$APP_PASSWORD -a $HEROKU_APP_NAME web
             heroku container:release -a $HEROKU_APP_NAME web
   deploy:
     docker:
