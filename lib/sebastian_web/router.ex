@@ -30,8 +30,7 @@ defmodule SebastianWeb.Router do
 
   scope "/", SebastianWeb do
     pipe_through [:browser, :protected]
-    live_dashboard "/dashboard", metrics: SebastianWeb.Telemetry
-
+    # live_dashboard "/dashboard", metrics: SebastianWeb.Telemetry
   end
 
   # Enables LiveDashboard only for development
