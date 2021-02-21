@@ -1,6 +1,7 @@
 
 defmodule SebastianWeb.Router do
   import Phoenix.LiveDashboard.Router
+  import Plug.BasicAuth
   require Logger
   use SebastianWeb, :router
 
@@ -17,10 +18,8 @@ defmodule SebastianWeb.Router do
   end
 
   pipeline :protected do
-    Logger.info "Protected"
     if System.get_env("HTTP_BASIC_AUTH_USERNAME") || System.get_env("HTTP_BASIC_AUTH_PASSWORD") do
-      Logger.info "Basic Auth triggered"
-      plug BasicAuth, use_config: {:sebastian, :basic_auth}
+      plug :basic_auth, Application.fetch_env!(:sebastian, :basic_auth)
     end
   end
 
@@ -30,7 +29,7 @@ defmodule SebastianWeb.Router do
 
   scope "/", SebastianWeb do
     pipe_through [:browser, :protected]
-    # live_dashboard "/dashboard", metrics: SebastianWeb.Telemetry
+    live_dashboard "/dashboard", metrics: SebastianWeb.Telemetry
   end
 
   # Enables LiveDashboard only for development
