@@ -33,9 +33,6 @@ RUN apk update \
 
 ENV REPLACE_OS_VARS=true
 
-# For local dev, heroku will ignore this
-EXPOSE $PORT
-
 WORKDIR /opt/app
 COPY --from=builder /opt/release .
 RUN addgroup -S elixir && adduser -H -D -S -G elixir elixir
