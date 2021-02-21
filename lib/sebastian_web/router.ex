@@ -18,7 +18,7 @@ defmodule SebastianWeb.Router do
   end
 
   pipeline :admins_only do
-    plug :basic_auth, username: "admin", password: "admin"
+    plug :basic_auth, Application.fetch_env!(:sebastian, :basic_auth)
   end
 
   pipeline :protected do
