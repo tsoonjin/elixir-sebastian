@@ -1,0 +1,84 @@
+version: 2
+
+jobs:
+  deploy-heroku:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Build and push Docker image to Heroku
+          command: |
+            export HEROKU_API_KEY=$HEROKU_API_KEY
+            sudo curl https://cli-assets.heroku.com/install.sh | sh
+            heroku container:login
+            heroku container:push -a $HEROKU_APP_NAME web
+            heroku container:release -a $HEROKU_APP_NAME web
+  deploy:
+    docker:
+      - image: binarynoggin/elixir-release-builder:latest
+        environment:
+          MIX_ENV: prod
+    working_directory: ~/app
+
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "SO:ME:FIN:G:ER:PR:IN:T"
+      - checkout
+      - run: echo ${MIX_ENV} >> MIX_ENV
+      - restore_cache:
+          keys:
+            - v0-mix-dependency-cache-{{ checksum "mix.lock" }}-{{ checksum "MIX_ENV" }}
+      - restore_cache:
+          keys:
+            - v0-npm-dependency-cache-{{ checksum "assets/package.json" }}
+      - run: mix deps.get
+      - run: npm install --prefix assets
+      - run: npm run deploy --prefix assets
+      - run: mix phx.digest
+      - run: mix release
+      - run: tar -zcvf ${DEPLOYMENT_NAME}-${MIX_ENV}.tar _build/${MIX_ENV}/rel/${DEPLOYMENT_NAME}
+      - run:
+          name: Upload release
+          command: |
+            scp -o "StrictHostKeyChecking no" \
+            ${DEPLOYMENT_NAME}-${MIX_ENV}.tar \
+            ${DEPLOY_USER}@${DEPLOY_URL}:/home/${DEPLOYMENT_NAME}/${DEPLOYMENT_NAME}-${MIX_ENV}-${CIRCLE_TAG}.tar
+      - save_cache:
+          key: v0-mix-dependency-cache-{{ checksum "mix.lock" }}-{{ checksum "MIX_ENV" }}
+          paths:
+            - deps
+            - _build
+
+  build:
+    docker:
+      - image: binarynoggin/elixir-release-builder:latest
+        environment:
+          ENV: test
+    working_directory: ~/app
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v0-mix-dependency-cache-{{ checksum "mix.lock" }}-{{ checksum "MIX_ENV" }}
+      - run: mix deps.get
+      - run: mix test
+      - save_cache:
+          key: v0-mix-dependency-cache-{{ checksum "mix.lock" }}-{{ checksum "MIX_ENV" }}
+          paths:
+            - deps
+            - _build
+
+workflows:
+  version: 2
+  develop:
+    jobs:
+      - build:
+          context: app
+      - deploy-heroku:
+          context: app
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
