@@ -4,12 +4,10 @@ FROM elixir:1.11-alpine as builder
 ARG app_name=sebastian
 ARG PORT=5000
 ARG build_env=prod
-ARG dashboard_username
-ARG dashboard_password
+ARG dashboard_username=admin
+ARG dashboard_password=admin
 ARG phoenix_subdir=.
 ENV MIX_ENV=${build_env}
-ENV HTTP_BASIC_AUTH_USERNAME=${dashboard_username}
-ENV HTTP_BASIC_AUTH_PASSWORD=${dashboard_password}
 
 RUN apk update \
   && mix local.rebar --force \
@@ -32,6 +30,8 @@ RUN apk update \
   && mkdir -p /usr/local/bin
 
 ENV REPLACE_OS_VARS=true
+ENV HTTP_BASIC_AUTH_USERNAME=${dashboard_username}
+ENV HTTP_BASIC_AUTH_PASSWORD=${dashboard_password}
 
 WORKDIR /opt/app
 COPY --from=builder /opt/release .
