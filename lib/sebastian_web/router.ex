@@ -3,13 +3,21 @@ defmodule SebastianWeb.Router do
   import Phoenix.LiveDashboard.Router
   use SebastianWeb, :router
 
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_flash
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
 
   pipeline :protected do
     if System.get_env("HTTP_BASIC_AUTH_USERNAME") || System.get_env("HTTP_BASIC_AUTH_PASSWORD") do
-      plug BasicAuth, use_config: {:sebastian_auth, :basic_auth}
+      plug BasicAuth, use_config: {:sebastian, :basic_auth}
     end
   end
 
@@ -18,7 +26,7 @@ defmodule SebastianWeb.Router do
   end
 
   scope "/", SebastianWeb do
-    pipe_through [:protected]
+    pipe_through [:browser, :protected]
     live_dashboard "/dashboard", metrics: SebastianWeb.Telemetry
 
   end
