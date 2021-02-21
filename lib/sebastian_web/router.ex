@@ -17,6 +17,7 @@ defmodule SebastianWeb.Router do
 
   pipeline :protected do
     if System.get_env("HTTP_BASIC_AUTH_USERNAME") || System.get_env("HTTP_BASIC_AUTH_PASSWORD") do
+      IO.puts "Basic Auth triggered"
       plug BasicAuth, use_config: {:sebastian, :basic_auth}
     end
   end
