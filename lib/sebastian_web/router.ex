@@ -17,6 +17,10 @@ defmodule SebastianWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :admins_only do
+    plug :basic_auth, username: "admin", password: "admin"
+  end
+
   pipeline :protected do
     if System.get_env("HTTP_BASIC_AUTH_USERNAME") || System.get_env("HTTP_BASIC_AUTH_PASSWORD") do
       plug :basic_auth, Application.fetch_env!(:sebastian, :basic_auth)
@@ -28,8 +32,8 @@ defmodule SebastianWeb.Router do
   end
 
   scope "/", SebastianWeb do
-    pipe_through [:browser, :protected]
-    live_dashboard "/dashboard", metrics: SebastianWeb.Telemetry
+    pipe_through [:browser, :admins_only]
+    live_dashboard "/dashboard"
   end
 
   # Enables LiveDashboard only for development
