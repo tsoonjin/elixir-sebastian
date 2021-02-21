@@ -2,6 +2,7 @@
 FROM elixir:1.11-alpine as builder
 
 ARG app_name=sebastian
+ARG PORT=5000
 ARG build_env=prod
 ARG dashboard_username
 ARG dashboard_password
