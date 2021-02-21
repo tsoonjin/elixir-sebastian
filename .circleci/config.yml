@@ -11,7 +11,7 @@ jobs:
             export HEROKU_API_KEY=$HEROKU_API_KEY
             sudo curl https://cli-assets.heroku.com/install.sh | sh
             heroku container:login
-            heroku container:push -a $HEROKU_APP_NAME web
+            heroku container:push --arg MIX_ENV=prod -a $HEROKU_APP_NAME web
             heroku container:release -a $HEROKU_APP_NAME web
   deploy:
     docker:
@@ -58,6 +58,7 @@ jobs:
     working_directory: ~/app
     steps:
       - checkout
+      - run: echo ${MIX_ENV} >> MIX_ENV
       - restore_cache:
           keys:
             - v0-mix-dependency-cache-{{ checksum "mix.lock" }}-{{ checksum "MIX_ENV" }}
