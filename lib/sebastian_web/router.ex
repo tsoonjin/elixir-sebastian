@@ -2,6 +2,7 @@
 defmodule SebastianWeb.Router do
   import Phoenix.LiveDashboard.Router
   import Plug.BasicAuth
+  require Logger
   use SebastianWeb, :router
 
   pipeline :browser do
@@ -17,7 +18,8 @@ defmodule SebastianWeb.Router do
   end
 
   pipeline :admins_only do
-    plug :basic_auth, Application.fetch_env!(:sebastian, SebastianWeb.Endpoint)[:basic_auth]
+    # plug :basic_auth, Application.fetch_env!(:sebastian, SebastianWeb.Endpoint)[:basic_auth]
+    plug :basic_auth, username: "mrgin", password: "SecretKeeper00"
   end
 
   pipeline :protected do
@@ -45,6 +47,7 @@ defmodule SebastianWeb.Router do
   # you can use Plug.BasicAuth to set up some basic authentication
   # as long as you are also using SSL (which you should anyway).
   if Mix.env() in [:dev, :test] do
+    Logger.info Application.fetch_env!(:sebastian, SebastianWeb.Endpoint)[:basic_auth]
     scope "/" do
       pipe_through [:browser, :admins_only]
       live_dashboard "/dashboard"
