@@ -35,6 +35,8 @@ defmodule SebastianWeb.Router do
 
   scope "/api", SebastianWeb do
     pipe_through :api
+    get "/quotes", QuoteController, :index
+
   end
 
   if Mix.env() in [:prod] do
