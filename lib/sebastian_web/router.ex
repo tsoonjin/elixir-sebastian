@@ -5,6 +5,12 @@ defmodule SebastianWeb.Router do
   require Logger
   use SebastianWeb, :router
 
+  defp auth(conn, opts) do
+    username = System.fetch_env!("HTTP_BASIC_AUTH_USERNAME")
+    password = System.fetch_env!("HTTP_BASIC_AUTH_PASSWORD")
+    basic_auth(conn, username: username, password: password)
+  end
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -18,8 +24,7 @@ defmodule SebastianWeb.Router do
   end
 
   pipeline :admins_only do
-    # plug :basic_auth, Application.fetch_env!(:sebastian, SebastianWeb.Endpoint)[:basic_auth]
-    plug :basic_auth, username: "mrgin", password: "SecretKeeper00"
+    plug :auth
   end
 
   pipeline :protected do

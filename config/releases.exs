@@ -15,6 +15,7 @@ http_basic_auth_password =
     raise """
     environment variable HTTP_BASIC_AUTH_PASSWORD is missing.
     """
+
 config :sebastian, SebastianWeb.Endpoint,
   url: [host: "sebastiankun.herokuapp.com", port: String.to_integer(System.fetch_env!("PORT"))],
   check_origin: ["//sebastiankun.herokuapp.com"],
